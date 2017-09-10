@@ -42,7 +42,7 @@ class Perceptron(object):
         self.errors_ = []
 
         for _ in range(self.n_iter):
-            errors = 0
+            #errors = 0
             for xi, target in zip(X, y):
                 update = self.eta * (target - self.predict(xi))
                 #if update!=0:
@@ -51,9 +51,11 @@ class Perceptron(object):
                 self.w_[0] += update
                 errors += int(update != 0.0)
                 
-            self.errors_.append(errors)    
-            #self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
+
+            #self.errors_.append(errors)    
+            self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
             self.getboundary()
+
         return self
 
     def net_input(self, X):
