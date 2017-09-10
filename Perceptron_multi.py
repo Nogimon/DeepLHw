@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-class Perceptron_online(object):
+class Perceptron_multi(object):
     """Perceptron classifer.
 
     Parameters
@@ -50,24 +50,59 @@ class Perceptron_online(object):
                 #errors += int(update != 0.0)
                 
             self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
+            print(self.w_)
             self.getboundary()
         return self
         
     def fit_batch(self, X, y):
-        self.w_ = np.zeros(1 + X.shape[1])
+        #self.w_ = [-4, -3, 19]
+        self.w_ = [0, -1, 1]
         self.errors_ = []
+        self.eta /= 100 #For full batch the eta needs to be set smaller
         for _ in range(self.n_iter):
+            update = 0
             for xi, target in zip(X, y):
                 update += self.eta * (target - self.predict(xi))
-            self.w_[1] += update * X
-            self.w_[2] += update
+            [x1, x2] = np.sum(X, axis = 0)
+            update /= len(X)
+            print(self.w_, x1, x2, update)
+            self.w_[1] += update * x1
+            self.w_[2] += update * x2
             self.w_[0] += update
             self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
-            self.getboundary()
+            print("new weight", self.w_)
+            self.getboundary()    
         
-            
         return self
+        
+    def fit_minibatch(self, X, y):
+        #self.w_ = [-4, -3, 19]
+        self.w_ = [0, -1, 1]
+        self.errors_ = []
+        self.eta /= 1
+        for _ in range(self.n_iter):
+            update = 0
+            i = 0
+            start = 0
+            for xi, target in zip(X, y):
+                update += self.eta * (target - self.predict(xi))
+                i += 1
+                if ((i % 20) == 0):
+                    [x1, x2] = np.sum(X[start:i], axis = 0)
+                    update /= 20
+                    self.w_[1] += update * x1
+                    self.w_[2] += update * x2
+                    self.w_[0] += update
+                    print(self.w_, x1, x2, update, i)
+                    update = 0
+                    start = i
+                    print(self.w_, x1, x2, update, i)
             
+            self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
+            print("new weight", self.w_)
+            self.getboundary()    
+        
+        return self
 
 
     def net_input(self, X):
@@ -85,13 +120,16 @@ class Perceptron_online(object):
         plt.scatter(X[50:100,0], X[50:100,1], c = 'b')
         plt.scatter(self.boundx, self.boundy, c = 'black')
         plt.show()
-        print(self.w_)
+        #print(self.w_)
 
         
 data = np.genfromtxt('./iris.txt')
 X = data[:,0:2]
 y = data[:,2]
 
-model = Perceptron()
-model.fit(X,y)
+model = Perceptron_multi(0.01, 10)
+#model.fit(X,y)
+#model.fit_batch(X, y)
+model.fit_minibatch(X, y)
+print(model.errors_)
 y_predic = model.predict(X)
