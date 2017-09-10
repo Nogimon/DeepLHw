@@ -42,14 +42,17 @@ class Perceptron(object):
         self.errors_ = []
 
         for _ in range(self.n_iter):
-            #errors = 0
+            errors = 0
             for xi, target in zip(X, y):
                 update = self.eta * (target - self.predict(xi))
+                #if update!=0:
+                print ('xi', xi, self.predict(xi), 'target', target, update)
                 self.w_[1:] += update * xi
                 self.w_[0] += update
-                #errors += int(update != 0.0)
+                errors += int(update != 0.0)
                 
-            self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
+            self.errors_.append(errors)    
+            #self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
             self.getboundary()
         return self
 
@@ -82,7 +85,7 @@ data = np.genfromtxt('./iris.txt')
 X = data[:,0:2]
 y = data[:,2]
 
-model = Perceptron(eta = 0.01, n_iter = 10)
+model = Perceptron(eta = 0.01, n_iter = 3)
 
 model.fit(X, y)
 predict = model.predict(X)
