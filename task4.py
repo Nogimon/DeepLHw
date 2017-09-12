@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from Perceptron_original import Perceptron
+from Perceptron_logistic import Perceptron_logistic
 
 print("now start to read iris2")
 data = np.genfromtxt('./iris2.txt')
@@ -36,3 +37,11 @@ for i in range(0, 10):
     error = np.sum(np.not_equal(y_test, model.predict(X_test)))
     print(i, 'th round, the final error is', error)
 
+    
+print("now start to use logistic neuron")
+model = Perceptron_logistic(eta = 100, n_iter = 50)
+
+y[y == -1] = 0
+model.fit_batch(X, y)
+print(model.errors_)
+print(model.w_)
