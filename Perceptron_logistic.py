@@ -39,13 +39,14 @@ class Perceptron(object):
         self.errors_ = []
 
         for _ in range(self.n_iter):
-            errors = 0
+            #errors = 0
             for xi, target in zip(X, y):
                 update = self.eta * (target - self.predict(xi))
                 self.w_[1:] += update * xi
                 self.w_[0] += update
-                errors += int(update != 0.0)
-            self.errors_.append(errors)
+                #errors += int(update != 0.0)
+            #self.errors_.append(errors)
+            self.errors_.append(np.sum(np.not_equal(y,self.predict(X))))
         return self
 
     def net_input(self, X):
@@ -54,4 +55,6 @@ class Perceptron(object):
 
     def predict(self, X):
         """Return class label after unit step"""
-        return np.where(self.net_input(X) >= 0.0, 1, -1)
+        #return np.where(self.net_input(X) >= 0.0, 1, -1)
+        return (1 / (1 + np.exp(self.net_input(X))))
+
