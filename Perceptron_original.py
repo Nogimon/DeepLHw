@@ -57,10 +57,3 @@ class Perceptron(object):
         """Return class label after unit step"""
         return np.where(self.net_input(X) >= 0.0, 1, -1)
 
-data = np.genfromtxt(r'E:\Lehigh\Courses\Deep Learning by Huang\iris.txt')
-X = data[:,0:2]
-y = data[:,2]
-
-model = Perceptron()
-model.fit(X,y)
-y_predic = model.predict(X)
