@@ -14,6 +14,11 @@ Since often the dataset has a very large quantity. In these cases using stochast
 I have used Python 3.5 from Anaconda and Spyder as my IDE.
 
 2.2
+I have written the code in Perceptron.py.
+To run the code, just run
+$ python Perceptron.py
+or run Perceptron.py in any IDE.
+
 
 
 
