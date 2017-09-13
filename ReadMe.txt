@@ -19,6 +19,10 @@ To run the code, just run
 $ python Perceptron.py
 or run Perceptron.py in any IDE.
 
+The errors series will be printed at last, and the weights during the training will be printed.
+
+2.3
+The figure is plotted through the iteration.
 
 
 

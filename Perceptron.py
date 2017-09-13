@@ -73,7 +73,7 @@ class Perceptron(object):
         plt.scatter(X[50:100,0], X[50:100,1], c = 'b')
         plt.scatter(self.boundx, self.boundy, c = 'black')
         plt.show()
-        print(self.w_)
+        print("the weights are", self.w_)
                 
         
 def getboundary():
@@ -92,8 +92,8 @@ model = Perceptron(eta = 0.01, n_iter = 10)
 model.fit(X, y)
 predict = model.predict(X)
 
-print(model.errors_)
-print(model.w_)
+print("the errors are", model.errors_)
+#print(model.w_)
 
 '''
 boundx = np.arange(4, 7.5, 0.1)
