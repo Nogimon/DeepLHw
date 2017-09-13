@@ -7,6 +7,8 @@ In the original "Perceptron.py", it uses Online updating strategy
 Stochastic gradient descent is apart from gradient descent. In gradient descent the gradient is calculated over all the data, but stochastic gradient descent only uses single or a few training examples to calculate the gradient and then do the update.
 Since often the dataset has a very large quantity. In these cases using stochastic gradient descent can be highly efficient.
 
+******
+
 
 ****Task 2****
 (Note: in all my files I changed error_ to display the # of wrong predictons)
@@ -23,12 +25,34 @@ The errors series will be printed at last, and the weights during the training w
 
 2.3
 The figure is plotted through the iteration.
+I write a function getboundary() to use the current weight to generate the line function of the classifier's boundary.
 
+******
 
 
 ****Task 3****
+3.1
+All three modules are written in one file Perceptron_multi.py.
+Only the fit functions are different. They are fit(), fit_batch() and fit_minibatch()
+The errors of all the fuctions are changed to the # of mispredicted numbers.
 
+3.2
+The program is written in task3.py, to run it simply run
+$ python task3.py
+Or to run task3.py in any IDE will do the job.
 
+Online, full-batch and minibatch methods are used and the three error series are printed out.
+
+3.3
+The task is still in task3.py
+I tried using 3 different learning rates, from 0.1 to 0.001.
+
+3.4
+I add one input parameter into the Perceptron. Now weight is also determined by the input.
+Three different initial weights are tried.
+As can be seen, Setting the weights in coherent with the learning rate will show the best training efficiency.
+
+******
 
 
 ****Task 4****
@@ -63,3 +87,5 @@ which gives a simple square of the diff from target and prediction.
 The update mechanism is also updated in fit_batch function.
 The error rate is printed out by the program. In order to get obvious improvement 30 iterations are used.
 In the end the weights are the training speed and accuracy of the logistic neuron cannot compare to the ones of linear neuron.
+
+******
