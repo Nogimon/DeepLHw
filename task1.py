@@ -25,4 +25,8 @@ network.SGD(training_data, 30, 10, 0.01, test_data = test_data)
 #Task 1.4
 #Task 1.5
 print("\nnow start to train with softmax layer and cross entropy cost", file = open("result.txt", "a"))
-network.SGD_softmax(training_data, 30, 10, 3.0, test_data = test_data)
+network.SGD_softmax(training_data, 30, 10, 3.0, activation_function = "sigmoid", test_data = test_data)
+
+#Task 1.6
+print("\nnow start to train with ReLU activation function", file = open("result.txt", "a"))
+network.SGD_softmax(training_data, 30, 10, 3.0, activation_function = "ReLU", test_data = test_data)
