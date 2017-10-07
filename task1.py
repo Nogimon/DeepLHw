@@ -8,6 +8,8 @@ from mnist_loader import load_data, load_data_wrapper, vectorized_result
 #Task 1.2
 network = Network([784, 30, 10])
 training_data, validation_data, test_data = load_data_wrapper()
+
+"""
 print("\ntask1.2:\nnow start to train\n", file = open("result.txt", "a"))
 network.SGD(training_data, 30, 10, 3.0, test_data=test_data)
 
@@ -26,7 +28,7 @@ network.SGD(training_data, 30, 10, 0.01, test_data = test_data)
 #Task 1.5
 print("\nnow start to train with softmax layer and cross entropy cost", file = open("result.txt", "a"))
 network.SGD_softmax(training_data, 30, 10, 3.0, activation_function = "sigmoid", test_data = test_data)
-
+"""
 #Task 1.6
 print("\nnow start to train with ReLU activation function", file = open("result.txt", "a"))
-network.SGD_softmax(training_data, 30, 10, 3.0, activation_function = "ReLU", test_data = test_data)
+network.SGD_softmax(training_data, 30, 10, 0.05, activation_function = "ReLU", test_data = test_data)

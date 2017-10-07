@@ -10,6 +10,7 @@ using backpropagation.
 #### Libraries
 # Standard library
 import random
+import math
 
 # Third-party libraries
 import numpy as np
@@ -114,9 +115,11 @@ class Network(object):
         return (nabla_b, nabla_w)
 
     def SGD_softmax(self, training_data, epochs, mini_batch_size, eta, activation_function, test_data=None):
-        if activation_function == "ReLU":
-            self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-            self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
+
+        if activation_function == "ReLU" or activation_function == "LeakyReLU":
+            self.weights = [np.random.randn(n) * math.sqrt(2.0/n) + 0.01 for n in self.sizes[1:]]
+            self.biases = [np.random.randn(n) * math.sqrt(2.0/n) + 0.01 for n in self.sizes[1:]]
+
         if test_data: n_test = len(test_data)
         n = len(training_data)
         for j in range(epochs):
@@ -154,11 +157,13 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            if count < self.num_layers:
+            if count < self.num_layers-1:
                 if activation_function == "sigmoid":
                     activation = sigmoid(z)
+                elif activation_function == "LeakyReLU":
+                    activation = LeakyReLU(z)
                 else:
-                    activation = ReLU(z)                
+                    activation = ReLU(z)               
             else:
                 #Switch the last layer with softmax one
                 activation = softmax(z)
@@ -173,10 +178,17 @@ class Network(object):
         # l = 1 means the last layer of neurons, l = 2 is the
         # second-last layer, and so on. This numbering takes advantage of the fact
         # that Python can use negative indices in lists.
-        if activation_function == "ReLu":
+        if activation_function == "ReLU":
             for l in range(2, self.num_layers):
                 z = zs[-l]
                 sp = ReLU_prime(z)
+                delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
+                nabla_b[-l] = delta
+                nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+        elif activation_function == "LeakyReLU":
+            for l in range(2, self.num_layers):
+                z = zs[-l]
+                sp = LeakyReLU_prime(z)
                 delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
                 nabla_b[-l] = delta
                 nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
@@ -225,9 +237,10 @@ def ReLU(z):
     return np.maximum(0.0, z)
 
 def ReLU_prime(z):
-    if (z > 0):
-        return 1
-    else:
-        return 0
+    return 1 * (z > 0)
 
 def LeakyReLU(z):
+    return z * (z > 0) + 0.01 * z * (z < 0)
+    
+def LeakyReLU_prime(z):
+    return 1 * (z > 0) + 0.01 * (z < 0)
