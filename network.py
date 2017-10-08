@@ -39,6 +39,23 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             a = sigmoid(np.dot(w, a)+b)
         return a
+    def feedforward_softmax(self, activation, activation_function):
+        count = 1
+        for b, w in zip(self.biases, self.weights):
+            z = np.dot(w, activation)+b
+            if count < self.num_layers-1:
+                if activation_function == "sigmoid":
+                    activation = sigmoid(z)
+                elif activation_function == "LeakyReLU":
+                    activation = LeakyReLU(z)
+                else:
+                    activation = ReLU(z)               
+            else:
+                #Switch the last layer with softmax one
+                activation = softmax(z)
+
+            count += 1
+        return activation
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
@@ -117,12 +134,12 @@ class Network(object):
     def SGD_softmax(self, training_data, epochs, mini_batch_size, eta, activation_function, test_data=None):
 
         if activation_function == "ReLU" or activation_function == "LeakyReLU":
-            self.biases = [0.01 * np.random.randn(y, 1) for y in self.sizes[1:]]
-            self.weights = [0.01 + 0.01 * np.random.randn(y, x) for x, y in zip(self.sizes[:-1], self.sizes[1:])]
+            self.biases = [0.01 + 0.01 * np.random.randn(y, 1) for y in self.sizes[1:]]
+            self.weights = [0.01 * np.random.randn(y, x) for x, y in zip(self.sizes[:-1], self.sizes[1:])]
             #self.weights = [np.random.randn(n) * math.sqrt(2.0/n) + 0.01 for n in self.sizes[1:]]
             #self.biases = [np.random.randn(n) * math.sqrt(2.0/n) + 0.01 for n in self.sizes[1:]]
             #for bias in self.biases:
-            #    bias.fill(0.5)
+            #    bias.fill(0.01)
 
         if test_data: n_test = len(test_data)
         n = len(training_data)
@@ -134,8 +151,14 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch_softmax(mini_batch, eta, activation_function)
             if test_data:
-                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
-                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test), file = open("result.txt", "a"))
+                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate_softmax(test_data, activation_function), n_test))
+                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate_softmax(test_data, activation_function), n_test), file = open("result.txt", "a"))
+                """
+                if self.evaluate(test_data) > 6500:
+                    eta = 0.0015
+                elif self.evaluate(test_data) > 7500:
+                    eta = 0.00015
+                """
             else:
                 print ("Epoch {0} complete".format(j))
                 print ("Epoch {0} complete".format(j), file = open("result.txt", "a"))
@@ -144,6 +167,7 @@ class Network(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop_softmax(x, y, activation_function)
+            #if delta_nabla_b
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         self.weights = [w-(eta/len(mini_batch))*nw
@@ -214,6 +238,15 @@ class Network(object):
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
 
+    def evaluate_softmax(self, test_data, activation_function):
+        """Return the number of test inputs for which the neural
+        network outputs the correct result. Note that the neural
+        network's output is assumed to be the index of whichever
+        neuron in the final layer has the highest activation."""
+        test_results = [(np.argmax(self.feedforward_softmax(x, activation_function)), y)
+                        for (x, y) in test_data]
+        return sum(int(x == y) for (x, y) in test_results)
+
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
@@ -248,4 +281,4 @@ def LeakyReLU(z):
     #return z * (z > 0) + 0.01 * z * (z < 0)
     
 def LeakyReLU_prime(z):
-    return 1 * (z > 0) + 0.01 * (z < 0)
+    return 1 * (z > 0)  - 0.01 * (z < 0)
