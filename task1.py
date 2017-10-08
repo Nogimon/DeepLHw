@@ -31,4 +31,4 @@ network.SGD_softmax(training_data, 30, 10, 3.0, activation_function = "sigmoid",
 """
 #Task 1.6
 print("\nnow start to train with ReLU activation function", file = open("result.txt", "a"))
-network.SGD_softmax(training_data, 30, 10, 0.05, activation_function = "ReLU", test_data = test_data)
+network.SGD_softmax(training_data, 60, 10, 0.0015, activation_function = "LeakyReLU", test_data = test_data)
