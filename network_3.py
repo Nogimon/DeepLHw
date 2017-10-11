@@ -15,7 +15,7 @@ import math
 # Third-party libraries
 import numpy as np
 
-class Network(object):
+class Network3(object):
 
     def __init__(self, sizes):
         """The list ``sizes`` contains the number of neurons in the
@@ -46,7 +46,7 @@ class Network(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta, update="SGD",
+    def SGD(self, training_data, epochs, mini_batch_size, eta, dropout = "false",
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -64,21 +64,15 @@ class Network(object):
                 training_data[k:k+mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
-                if update == "momentum":
-                    #print("now start to train with momentum update\n")
-                    self.update_mini_batch_momentum(mini_batch, eta)
-                elif update == "Nestorov":
-                    #print("now start to train with Nestorov update\n")
-                    self.update_mini_batch_nest(mini_batch, eta)
-                else:
-                    self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch(mini_batch, eta, dropout)
             if test_data:
                 print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
                 print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test), file = open("result.txt", "a"))
             else:
                 print ("Epoch {0} complete".format(j))
                 print ("Epoch {0} complete".format(j), file = open("result.txt", "a"))
-    def update_mini_batch(self, mini_batch, eta):
+    def update_mini_batch(self, mini_batch, eta, dropout):
+        #print("dropout:", dropout)
         """Update the network's weights and biases by applying
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
@@ -86,48 +80,12 @@ class Network(object):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         for x, y in mini_batch:
-            delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+            if dropout == "true":
+                delta_nabla_b, delta_nabla_w = self.backprop_dropout(x, y)
+            else:
+                delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(eta/len(mini_batch))*nw
-                        for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb
-                       for b, nb in zip(self.biases, nabla_b)]
-
-    def update_mini_batch_momentum(self, mini_batch, eta):
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_w = [np.zeros(w.shape) for w in self.weights]
-        delta_nabla_b = [np.zeros(b.shape) for b in self.biases]
-        delta_nabla_w = [np.zeros(w.shape) for w in self.weights]
-        mu = 0.9
-        #v_nabla = learningrate*dx, nabla == v
-        for x, y in mini_batch:
-            new_nabla_b, new_nabla_w = self.backprop(x, y)
-            delta_nabla_b = list(np.add(list(np.multiply(mu, delta_nabla_b)), new_nabla_b))
-            delta_nabla_w = list(np.add(list(np.multiply(mu, delta_nabla_w)), new_nabla_w))
-            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(eta/len(mini_batch))*nw
-                        for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb
-                       for b, nb in zip(self.biases, nabla_b)]
-
-    def update_mini_batch_nest(self, mini_batch, eta):
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_w = [np.zeros(w.shape) for w in self.weights]
-        delta_nabla_b = [np.zeros(b.shape) for b in self.biases]
-        delta_nabla_w = [np.zeros(w.shape) for w in self.weights]
-        mu = 0.9
-        for x, y in mini_batch:
-            new_nabla_b, new_nabla_w = self.backprop(x, y)
-            nabla_b_prev = delta_nabla_b[:] 
-            nabla_w_prev = delta_nabla_w[:]
-            delta_nabla_b = np.add(list(np.multiply(mu, delta_nabla_b)), new_nabla_b)
-            delta_nabla_w = np.add(list(np.multiply(mu, delta_nabla_w)), new_nabla_w)
-            final_b = list(np.add(list(np.multiply(-mu, nabla_b_prev)), list(np.multiply(1 + mu, delta_nabla_b))))
-            final_w = list(np.add(list(np.multiply(-mu, nabla_w_prev)), list(np.multiply(1 + mu, delta_nabla_w))))
-            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, final_b)]
-            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, final_w)]
         self.weights = [w-(eta/len(mini_batch))*nw
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(eta/len(mini_batch))*nb
@@ -165,7 +123,7 @@ class Network(object):
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
-    '''
+
     def backprop_dropout(self, x, y):
         #Set the dropout rate
         p = 0.5
@@ -186,17 +144,17 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             
             if count < self.num_layers-1:
-                z = np.dot(w, activation)+b                
-                droplayer = (np.random.rand(*z.shape) < p) / p
-                z *= droplayer
+                z = np.dot(w, activation)+b
                 zs.append(z)
+                activation = sigmoid(z)
+                droplayer = (np.random.rand(*z.shape) < p) / p
+                activation *= droplayer
                 drop.append(droplayer)
-                activation = sigmoid(z)             
             else:
                 #Last output there is no dropout
                 z = np.dot(w, activation)+b
                 zs.append(z)
-                activation = softmax(z)
+                activation = sigmoid(z)
             activations.append(activation)
         count += 1
 
@@ -204,6 +162,7 @@ class Network(object):
         # backward pass
         delta = self.cost_derivative(activations[-1], y) * \
             sigmoid_prime(zs[-1])
+        delta *= drop[-1]
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note about the variable l: Here,
@@ -214,11 +173,11 @@ class Network(object):
             z = zs[-l]
             sp = sigmoid_prime(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
-            delta *= drop[-l+1]
+            delta *= drop[-l]
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
-    '''
+
     def evaluate(self, test_data):
         """Return the number of test inputs for which the neural
         network outputs the correct result. Note that the neural

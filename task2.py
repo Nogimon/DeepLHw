@@ -3,6 +3,7 @@ import pickle as cPickle
 import gzip
 import random
 from network_2 import Network
+from network_3 import Network3
 from mnist_loader import load_data, load_data_wrapper, vectorized_result
 
 def mean_data(data):
@@ -29,10 +30,16 @@ train_mean = mean_data(training_data)
 test_mean = mean_data(test_data)
 print("\ntask2.2:\nnow start to train with prepocessed data\n", file = open("result_task2.txt", "a"))
 network.SGD(train_mean, 30, 10, 3.0, test_data=test_mean)
-'''
+
 
 #Task 2.3
 #print("\ntask2.2:\nnow start to train with momentum data\n", file = open("result_task2.txt", "a"))
 #network.SGD(training_data, 30, 10, 3.0, update = "momentum", test_data=test_data)
+#Task 2.4
 print("\ntask2.2:\nnow start to train with Nestorov data\n", file = open("result_task2.txt", "a"))
 network.SGD(training_data, 30, 10, 3.0, update = "Nestorov", test_data=test_data)
+'''
+#Task 2.5
+print("\ntask2.2:\nnow start to train with dropout\n", file = open("result_task2.txt", "a"))
+network3 = Network3([784, 30, 10])
+network3.SGD(training_data, 30, 10, 3.0, dropout = "true", test_data=test_data)
