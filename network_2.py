@@ -74,7 +74,7 @@ class Network(object):
                     self.update_mini_batch(mini_batch, eta)
             if test_data:
                 print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
-                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test), file = open("result.txt", "a"))
+                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test), file = open("result_task2.txt", "a"))
             else:
                 print ("Epoch {0} complete".format(j))
                 print ("Epoch {0} complete".format(j), file = open("result.txt", "a"))

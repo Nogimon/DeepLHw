@@ -46,7 +46,7 @@ class Network3(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta, dropout = "false",
+    def SGD(self, training_data, epochs, mini_batch_size, eta, dropout = "false", adapteta = "false",
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -66,8 +66,13 @@ class Network3(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta, dropout)
             if test_data:
-                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
-                print ("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test), file = open("result.txt", "a"))
+                evaluatedata = self.evaluate(test_data)
+                print ("Epoch {0}: {1} / {2}".format(j, evaluatedata, n_test))
+                print ("Epoch {0}: {1} / {2}".format(j, evaluatedata, n_test), file = open("result_task2.txt", "a"))
+                if adapteta == "true":
+                    if evaluatedata > 9000 and eta > 0.1:
+                        eta *= 0.8
+
             else:
                 print ("Epoch {0} complete".format(j))
                 print ("Epoch {0} complete".format(j), file = open("result.txt", "a"))
