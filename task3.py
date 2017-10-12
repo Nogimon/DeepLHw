@@ -2,7 +2,7 @@ import numpy as np
 import keras
 from keras.datasets import cifar10, mnist
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten
+from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, ZeroPadding2D
 from keras.optimizers import Adam
 '''
 x_train = np.random.random((1000, 100))
@@ -67,27 +67,30 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
 #model.add(Dropout(0.5))
 
+model.add(ZeroPadding2D((1, 1)))
 model.add(Conv2D(64, (3, 3), padding = 'same'))
 model.add(Activation('relu'))
 model.add(Conv2D(64, (3, 3)))
-model.add(Activation('relu')
+model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
 #model.add(Dropout(0.5))
 
+model.add(ZeroPadding2D((1, 1)))
 model.add(Conv2D(128, (3, 3), padding = 'same'))
 model.add(Activation('relu'))
 model.add(Conv2D(128, (3, 3)))
 model.add(Activation('relu')
 model.add(Conv2D(128, (3, 3)))
-model.add(Activation('relu')
+model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
 
+model.add(ZeroPadding2D((1, 1)))
 model.add(Conv2D(256, (3, 3), padding = 'same'))
 model.add(Activation('relu'))
 model.add(Conv2D(256, (3, 3)))
-model.add(Activation('relu')
+model.add(Activation('relu'))
 model.add(Conv2D(256, (3, 3)))
-model.add(Activation('relu')
+model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
 
 model.add(Flatten())
