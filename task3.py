@@ -20,7 +20,7 @@ model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), me
 #model.compile(loss = 'categorical_crossentropy', optimizer = keras.optimizer.SGD(lr = 0.01, momentum = 0.9, nesterov = True), metrics = ['accuracy'])
 
 model.fit(x_train, y_train, epochs = 5, batch_size = 10)
-'''
+
 #(x_train, y_train), (x_test, y_test) = mnist.load_data()
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
@@ -52,7 +52,7 @@ for i in range(len(pre)):
         acc+=1
 
 score = model.evaluate(x_test, y_test, batch_size = 100)
-
+'''
 #convolutional network
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 y_train = keras.utils.to_categorical(y_train, num_classes = 10)
