@@ -4,6 +4,7 @@ from keras.datasets import cifar10, mnist
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, ZeroPadding2D
 from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 '''
 x_train = np.random.random((1000, 100))
 y_train = np.random.randint(10, size = (1000, 1))
@@ -65,7 +66,7 @@ model.add(Activation('relu'))
 model.add(Conv2D(32, (3, 3), padding = 'same'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-#model.add(Dropout(0.5))
+model.add(Dropout(0.25))
 
 model.add(ZeroPadding2D((1, 1)))
 model.add(Conv2D(64, (3, 3), padding = 'same'))
@@ -73,13 +74,13 @@ model.add(Activation('relu'))
 model.add(Conv2D(64, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-#model.add(Dropout(0.5))
-
+model.add(Dropout(0.25))
+'''
 model.add(ZeroPadding2D((1, 1)))
 model.add(Conv2D(128, (3, 3), padding = 'same'))
 model.add(Activation('relu'))
 model.add(Conv2D(128, (3, 3)))
-model.add(Activation('relu')
+model.add(Activation('relu'))
 model.add(Conv2D(128, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
@@ -96,14 +97,18 @@ model.add(MaxPooling2D(pool_size = (2, 2)))
 model.add(Flatten())
 model.add(Dense(2048))
 model.add(Dropout(0.5))
-model.add(Dense(256))
+'''
+model.add(Flatten())
+model.add(Dense(512))
 model.add(Dropout(0.5))
 model.add(Dense(10))
 model.add(Activation('softmax'))
 
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
 
-model.fit(x_train, y_train, epochs = 30, batch_size = 10)
+model_checkpoint = ModelCheckpoint('./weights1.h5'.format(), monitor='val_loss', save_best_only=True)
+
+model.fit(x_train, y_train, epochs = 50, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
 
 pre = model.predict(x_test)
 pre = [np.argmax(x) for x in pre]
@@ -115,3 +120,5 @@ for i in range(len(pre)):
         acc+=1
 
 score = model.evaluate(x_test, y_test, batch_size = 100)
+
+print (acc)
