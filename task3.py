@@ -1,7 +1,7 @@
 import numpy as np
 import keras
 from keras.datasets import cifar10, mnist
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, ZeroPadding2D
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -106,9 +106,11 @@ model.add(Activation('softmax'))
 
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
 
+model = load_model('./weights1.h5')
+
 model_checkpoint = ModelCheckpoint('./weights1.h5'.format(), monitor='val_loss', save_best_only=True)
 
-model.fit(x_train, y_train, epochs = 50, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
+model.fit(x_train, y_train, epochs = 80, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
 
 pre = model.predict(x_test)
 pre = [np.argmax(x) for x in pre]

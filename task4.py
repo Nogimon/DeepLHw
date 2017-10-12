@@ -13,52 +13,55 @@ y_test = keras.utils.to_categorical(y_test, num_classes = 10)
 
 model = Sequential()
 
-model.add(Conv2D(64, 3, 3, activation = 'relu', name = 'conv1_1', input_shape = (32, 32, 3)))
-model.add(ZeroPadding2D((1,1))
-model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_2'))
-model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+model.add(Conv2D(32, (3, 3), padding = 'same', input_shape = (32, 32, 3)))#input_shape = (28,28)))
+model.add(Activation('relu'))
+model.add(Conv2D(32, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
 
 model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(128, 3, 3, activation='relu', name='conv2_1'))
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(128, 3, 3, activation='relu', name='conv2_2'))
-model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+model.add(Conv2D(64, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(Conv2D(64, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
 
 model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(256, 3, 3, activation='relu', name='conv3_1'))
+model.add(Conv2D(128, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(Conv2D(128, (3, 3)))
+model.add(Activation('relu'))
+model.add(Conv2D(128, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
+'''
 model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(256, 3, 3, activation='relu', name='conv3_2'))
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(256, 3, 3, activation='relu', name='conv3_3'))
-model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+model.add(Conv2D(256, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(Conv2D(256, (3, 3)))
+model.add(Activation('relu'))
+model.add(Conv2D(256, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
 
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(512, 3, 3, activation='relu', name='conv4_1'))
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(512, 3, 3, activation='relu', name='conv4_2'))
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(512, 3, 3, activation='relu', name='conv4_3'))
-model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_1'))
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_2'))
-model.add(ZeroPadding2D((1, 1)))
-model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_3'))
-model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
-model.add(Flatten(name='flatten'))
-model.add(Dense(4096, activation='relu', name='dense_1'))
+model.add(Flatten())
+model.add(Dense(2048))
 model.add(Dropout(0.5))
-model.add(Dense(200, activation='relu', name='dense_2'))
+'''
+model.add(Flatten())
+model.add(Dense(512))
 model.add(Dropout(0.5))
-model.add(Dense(10, name='dense_3'))
-model.add(Activation('softmax', name='softmax'))
+model.add(Dense(10))
+model.add(Activation('softmax'))
 
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
 
-model.fit(x_train, y_train, epochs = 30, batch_size = 10)
+model_checkpoint = ModelCheckpoint('./weights_task4_1.h5'.format(), monitor='val_loss', save_best_only=True)
+
+model.fit(x_train, y_train, epochs = 80, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
 
 pre = model.predict(x_test)
 pre = [np.argmax(x) for x in pre]
@@ -70,3 +73,5 @@ for i in range(len(pre)):
         acc+=1
 
 score = model.evaluate(x_test, y_test, batch_size = 100)
+
+
