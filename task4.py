@@ -1,9 +1,10 @@
 import numpy as np
 import keras
 from keras.datasets import cifar10, mnist
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten
+from keras.models import Sequential, load_model
+from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, ZeroPadding2D
 from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -61,7 +62,7 @@ model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), me
 
 model_checkpoint = ModelCheckpoint('./weights_task4_1.h5'.format(), monitor='val_loss', save_best_only=True)
 
-model.fit(x_train, y_train, epochs = 80, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
+model.fit(x_train, y_train, epochs = 50, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
 
 pre = model.predict(x_test)
 pre = [np.argmax(x) for x in pre]
@@ -73,5 +74,7 @@ for i in range(len(pre)):
         acc+=1
 
 score = model.evaluate(x_test, y_test, batch_size = 100)
+
+print(acc)
 
 
