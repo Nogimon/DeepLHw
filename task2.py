@@ -21,9 +21,9 @@ def mean_data(data):
 #Task 2.1
 network = Network([784, 30, 10])
 training_data, validation_data, test_data = load_data_wrapper()
-'''
-#print("\ntask2.1:\nnow start to train\n", file = open("result_task2.txt", "a"))
-#network.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+
+print("\ntask2.1:\nnow start to train\n", file = open("result_task2.txt", "a"))
+network.SGD(training_data, 30, 10, 3.0, test_data=test_data)
 
 #Task 2.2
 train_mean = mean_data(training_data)
@@ -34,19 +34,19 @@ network.SGD(train_mean, 30, 10, 3.0, test_data=test_mean)
 
 #Task 2.3
 network2 = Network([784, 30, 10])
-#print("\ntask2.2:\nnow start to train with momentum data\n", file = open("result_task2.txt", "a"))
-#network2.SGD(training_data, 30, 10, 3.0, update = "momentum", test_data=test_data)
+print("\ntask2.2:\nnow start to train with momentum data\n", file = open("result_task2.txt", "a"))
+network2.SGD(training_data, 30, 10, 3.0, update = "momentum", test_data=test_data)
 
-print("\ntask2.2:\nnow start to train with Nestorov data\n", file = open("result_task2.txt", "a"))
+print("\ntask2.3:\nnow start to train with Nestorov data\n", file = open("result_task2.txt", "a"))
 network2.SGD(training_data, 30, 10, 3.0, update = "Nestorov", test_data=test_data)
-'''
+
 #Task 2.4
-print("\ntask2.2:\nnow start to train with dropout\n", file = open("result_task2.txt", "a"))
+print("\ntask2.4:\nnow start to train with dropout\n", file = open("result_task2.txt", "a"))
 network3 = Network3([784, 30, 10])
 network3.SGD(training_data, 30, 10, 3.0, dropout = "true", test_data=test_data)
 
 #Task 2.5
-print("\ntask2.2:\nnow start with Model Averaging\n", file = open("result_task2.txt", "a"))
+print("\ntask2.5:\nnow start with Model Averaging\n", file = open("result_task2.txt", "a"))
 sum1 = 0
 for (x, y) in test_data:
 	t1 = network.feedforward(x)
@@ -57,17 +57,7 @@ for (x, y) in test_data:
 	if t == y:
 		sum1 += 1
 print ("averaged result: {0} / {1}".format(sum1, len(test_data)))
-'''
-test_results = network.feedforward(test_data)
-for nw in [network2, network3]:
-	test_result = nw.feedforward(test_data)
-	test_results = test_results + test_result
-test_results = [np.argmax(x) for x in test_results]
-test_results = [(np.argmax(self.feedforward(x)), y)
-                        for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
-'''
 
 #Task 2.6
-print("\ntask2.2:\nnow start with Adaptive learning rate\n", file = open("result_task2.txt", "a"))
+print("\ntask2.6:\nnow start with Adaptive learning rate\n", file = open("result_task2.txt", "a"))
 network3.SGD(training_data, 30, 10, 3.0, adapteta = "true", test_data=test_data)
