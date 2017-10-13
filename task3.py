@@ -5,56 +5,42 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, ZeroPadding2D
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-'''
-x_train = np.random.random((1000, 100))
-y_train = np.random.randint(10, size = (1000, 1))
-y_train = keras.utils.to_categorical(y_train, num_classes = 10)
 
-model = Sequential()
+def unpickle(file):
+    import pickle
+    with open(file, 'rb') as fo:
+        dict1 = pickle.load(fo, encoding='bytes')
+    return dict1
+    
+def vectorized_result(j):
+    e = np.zeros((10, 1))
+    e[j] = 1.0
+    return e
 
-model.add(Dense(units = 30, input_dim = 100))#input_shape = (28,28)))
-model.add(Activation('relu'))
-model.add(Dense(units = 10))
-model.add(Activation('softmax'))
+#Old methods
+#Start to read cifar data
+data = unpickle('./cifar-10-batches-py/data_batch_1')
+training_inputs0 = data[b'data']
+training_results0 = data[b'labels']
+#Process the data into tuples to reach the requirements for network.py
+training_inputs1 = training_inputs0[0:9000]
+test_inputs1 = training_inputs0[9000:]
+training_results1 = training_results0[0:9000]
+test_result1 = training_results0[9000:]
 
-model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
-#model.compile(loss = 'categorical_crossentropy', optimizer = keras.optimizer.SGD(lr = 0.01, momentum = 0.9, nesterov = True), metrics = ['accuracy'])
+training_inputs2 = [np.reshape(x, (3072, 1)) for x in training_inputs1]
+training_results2 = [vectorized_result(y) for y in training_results1]
+training_data1 = list(zip(training_inputs2, training_results2))
 
-model.fit(x_train, y_train, epochs = 5, batch_size = 10)
+test_inputs = [np.reshape(x, (3072, 1)) for x in test_inputs1]
+test_data = list(zip(test_inputs,test_result1))
+#build and train the network
+network = Network([3072, 35, 10])
+network.SGD_softmax(training_data1, 30, 10, 0.15, activation_function = "LeakyReLU", test_data = test_data)
 
-#(x_train, y_train), (x_test, y_test) = mnist.load_data()
-(x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
-x_train = np.reshape(x_train, (50000, 32*32*3))
-x_test = np.reshape(x_test, (10000, 32*32*3))
 
-y_train = keras.utils.to_categorical(y_train, num_classes = 10)
-y_test = keras.utils.to_categorical(y_test, num_classes = 10)
-
-model = Sequential()
-
-model.add(Dense(units = 30, input_dim = 32*32*3))#input_shape = (28,28)))
-model.add(Activation('relu'))
-model.add(Dense(units = 10))
-model.add(Activation('softmax'))
-
-model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
-#model.compile(loss = 'categorical_crossentropy', optimizer = keras.optimizer.SGD(lr = 0.01, momentum = 0.9, nesterov = True), metrics = ['accuracy'])
-
-model.fit(x_train, y_train, epochs = 30, batch_size = 10)
-
-pre = model.predict(x_test)
-pre = [np.argmax(x) for x in pre]
-y = [np.argmax(y) for y in y_test]
-
-acc = 0
-for i in range(len(pre)):
-    if pre[i] == y[i]:
-        acc+=1
-
-score = model.evaluate(x_test, y_test, batch_size = 100)
-'''
-#convolutional network
+#Convolutional network
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 y_train = keras.utils.to_categorical(y_train, num_classes = 10)
 y_test = keras.utils.to_categorical(y_test, num_classes = 10)
@@ -106,7 +92,7 @@ model.add(Activation('softmax'))
 
 model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
 
-model = load_model('./weights1.h5')
+#model = load_model('./weights1.h5')
 
 model_checkpoint = ModelCheckpoint('./weights1.h5'.format(), monitor='val_loss', save_best_only=True)
 
