@@ -1,40 +1,77 @@
 import numpy as np
-import pickle as cPickle
-import gzip
-import random
-from network import Network
-from mnist_loader import load_data, load_data_wrapper, vectorized_result
-
-#Task 1.2
-network = Network([784, 30, 10])
-training_data, validation_data, test_data = load_data_wrapper()
+import keras
+from keras.datasets import cifar10, mnist
+from keras.models import Sequential, load_model
+from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, ZeroPadding2D
+from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
-print("\ntask1.2:\nnow start to train\n", file = open("result.txt", "a"))
-network.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+y_train = keras.utils.to_categorical(y_train, num_classes = 10)
+y_test = keras.utils.to_categorical(y_test, num_classes = 10)
 
-#Task 1.3
-print("\ntask1.3\nnow start to train with 0 hidden layers\n", file = open("result.txt", "a"))
-network1 = Network([784, 10])
-network1.SGD(training_data, 30, 10, 3.0, test_data = test_data)
 
-print("\nnow start to train with learning rate = 30", file = open("result.txt", "a"))
-network.SGD(training_data, 30, 10, 30, test_data = test_data)
+model = Sequential()
 
-print("\nnow start to train with learning rate = 0.01", file = open("result.txt", "a"))
-network.SGD(training_data, 30, 10, 0.01, test_data = test_data)
+model.add(Conv2D(32, (3, 3), padding = 'same', input_shape = (32, 32, 3)))#input_shape = (28,28)))
+model.add(Activation('relu'))
+model.add(Conv2D(32, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
 
-#Task 1.4
-#See README for analysis result
+model.add(ZeroPadding2D((1, 1)))
+model.add(Conv2D(64, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(Conv2D(64, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
 
-#Task 1.5
-print("\nnow start to train with softmax layer and cross entropy cost", file = open("result.txt", "a"))
-network.SGD_softmax(training_data, 30, 10, 3.0, activation_function = "sigmoid", test_data = test_data)
+model.add(ZeroPadding2D((1, 1)))
+model.add(Conv2D(128, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(Conv2D(128, (3, 3)))
+model.add(Activation('relu'))
+model.add(Conv2D(128, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Dropout(0.25))
+'''
+model.add(ZeroPadding2D((1, 1)))
+model.add(Conv2D(256, (3, 3), padding = 'same'))
+model.add(Activation('relu'))
+model.add(Conv2D(256, (3, 3)))
+model.add(Activation('relu'))
+model.add(Conv2D(256, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Flatten())
+model.add(Dense(2048))
+model.add(Dropout(0.5))
+'''
+model.add(Flatten())
+model.add(Dense(512))
+model.add(Dropout(0.5))
+model.add(Dense(10))
+model.add(Activation('softmax'))
 
-#Task 1.6
-print("\nnow start to train with ReLU activation function", file = open("result.txt", "a"))
-network.SGD_softmax(training_data, 30, 10, 0.15, activation_function = "ReLU", test_data = test_data)
+model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr = 1e-5), metrics = ['accuracy'])
 
-#Task 1.7
-print("\nnow start to train with Leaky ReLU activation function", file = open("result.txt", "a"))
-network.SGD_softmax(training_data, 30, 10, 0.15, activation_function = "LeakyReLU", test_data = test_data)
+model_checkpoint = ModelCheckpoint('./weights_task4_1.h5'.format(), monitor='val_loss', save_best_only=True)
+
+model.fit(x_train, y_train, epochs = 50, batch_size = 10, callbacks=[model_checkpoint], validation_data=(x_test, y_test))
+
+pre = model.predict(x_test)
+pre = [np.argmax(x) for x in pre]
+y = [np.argmax(y) for y in y_test]
+
+acc = 0
+for i in range(len(pre)):
+    if pre[i] == y[i]:
+        acc+=1
+
+score = model.evaluate(x_test, y_test, batch_size = 100)
+
+print(acc)
