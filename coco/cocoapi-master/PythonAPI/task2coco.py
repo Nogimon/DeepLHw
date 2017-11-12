@@ -1,18 +1,58 @@
-from PIL import Image
+
 import numpy as np
-import os
-from glob import glob
-import cv2
 from keras.models import Model
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
 from keras.optimizers import Adam
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-
+from pycocotools.coco import COCO
+import skimage.io as io
+import matplotlib.pyplot as plt
+import pylab
+from matplotlib.patches import Polygon
+import cv2
 
 def generateData():
+	#set parameters
+	dire = '/media/zlab-1/Data/Lian/course/DeepLHw/coco/'
+	dataDir=dire
+	dataType='val2014'
+	annFile='{}/annotations/instances_{}.json'.format(dire,dataType)
 
-	return X, y, X_validate, y_validate
+	#load coco api and coco categories
+	coco=COCO(annFile)
+
+	cats = coco.loadCats(coco.getCatIds())
+	nms=[cat['name'] for cat in cats]
+	print('COCO categories: \n{}\n'.format(' '.join(nms)))
+
+	nms = set([cat['supercategory'] for cat in cats])
+	print('COCO supercategories: \n{}'.format(' '.join(nms)))
+
+	#load data
+	catIds = coco.getCatIds(catNms = ['person'])
+	imgIds = coco.getImgIds(catIds = catIds)
+	img = coco.loadImgs(imgIds)
+
+	#annIds = coco.getAnnIds(catIds = catIds)
+	#anns = coco.loadAnns(imgIds)
+
+	train = []
+	y = []
+	for i in range(len(img)):
+		I = io.imread('%s/images/%s/%s'%(dataDir,dataType,img[i]['file_name']))
+		I2 = cv2.resize(I, (128, 128), cv2.INTER_LINEAR)
+
+		annIds = coco.getAnnIds(imgIds=img[i]['id'], catIds=catIds, iscrowd=None)
+		anns = coco.loadAnns(annIds)
+		mask = coco.annToMask(anns[0])
+		mask2 = cv2.resize(mask, (128, 128), cv2.INTER_LINEAR)
+
+		train.append(I2)
+		y.append(mask2)
+	
+
+	return X, y
 
 
 def get_model(channelsize):
@@ -67,6 +107,10 @@ def dice_coef(y_true, y_pred):
 
 def dice_coef_loss(y_true, y_pred):
     return -dice_coef(y_true, y_pred)
+
+def generateData():
+    
+
 
 
 if __name__ == '__main__':
