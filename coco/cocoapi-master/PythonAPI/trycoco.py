@@ -3,7 +3,8 @@ import numpy as np
 import skimage.io as io
 import matplotlib.pyplot as plt
 import pylab
-
+from matplotlib.patches import Polygon
+import matplotlib.pyplot as plt
 
 dire = '/media/zlab-1/Data/Lian/course/DeepLHw/coco/'
 dataDir=dire + 'images'
@@ -26,7 +27,7 @@ img = coco.loadImgs(imgIds[np.random.randint(0,len(imgIds))])[0]
 
 
 # load and display image
-# I = io.imread('%s/images/%s/%s'%(dataDir,dataType,img['file_name']))
+#I = io.imread('%s/images/%s/%s'%(dataDir,dataType,img['file_name']))
 # use url to load image
 I = io.imread(img['coco_url'])
 plt.axis('off')
@@ -39,3 +40,18 @@ plt.imshow(I); plt.axis('off')
 annIds = coco.getAnnIds(imgIds=img['id'], catIds=catIds, iscrowd=None)
 anns = coco.loadAnns(annIds)
 coco.showAnns(anns)
+
+
+ann = anns[2]
+polygons = []
+for seg in ann['segmentation']:
+    poly = np.array(seg).reshape((int(len(seg)/2), 2))
+    polygons.append(Polygon(poly))
+plt.plot(poly[:,0],poly[:,1])
+
+for ann1 in anns:
+    mask = coco.annToMask(ann1)
+    plt.figure()
+    plt.imshow(mask)
+
+
