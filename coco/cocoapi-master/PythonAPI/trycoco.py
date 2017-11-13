@@ -28,25 +28,27 @@ catIds = coco.getCatIds(catNms = ['person'])
 imgIds = coco.getImgIds(catIds = catIds)
 img = coco.loadImgs(imgIds)
 
-annIds = coco.getAnnIds(catIds = catIds)
-anns = coco.loadAnns(imgIds)
+#annIds = coco.getAnnIds(catIds = catIds)
+#anns = coco.loadAnns(imgIds)
 
 train = []
 y = []
-for i in range(len(img)):
+for i in range(100):#len(img)):
     I = io.imread('%s/images/%s/%s'%(dataDir,dataType,img[i]['file_name']))
     I2 = cv2.resize(I, (128, 128), cv2.INTER_LINEAR)
     
     annIds = coco.getAnnIds(imgIds=img[i]['id'], catIds=catIds, iscrowd=None)
     anns = coco.loadAnns(annIds)
-    mask = coco.annToMask(anns[i])
+    mask = coco.annToMask(anns[0])
     mask2 = cv2.resize(mask, (128, 128), cv2.INTER_LINEAR)
     
+    I2 = np.asarray(I2)
+    mask2 = np.asarray(mask2)
     train.append(I2)
     y.append(mask2)
     
-
-    
+train = np.asarray(train)
+y = np.asarray(y)
 
 
     
