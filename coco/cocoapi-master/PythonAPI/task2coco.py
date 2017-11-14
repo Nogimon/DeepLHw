@@ -45,8 +45,8 @@ def generateData():
 	#y = np.asarray(y)
 	for i in range(len(img) - 1500):
 		I = io.imread('%s/images/%s/%s'%(dataDir,dataType,img[i]['file_name']))
-		I3 = cv2.resize(I, (128, 128), cv2.INTER_LINEAR)
-		if (I3.shape != (128,128,3)):
+		I3 = cv2.resize(I, (224, 224), cv2.INTER_LINEAR)
+		if (I3.shape != (224, 224,3)):
 			continue
 		#I3 = [I2[:,:,0], I2[:,:,1], I2[:,:,2]]
 		#I3 = np.asarray(I3)
@@ -54,7 +54,7 @@ def generateData():
 		annIds = coco.getAnnIds(imgIds=img[i]['id'], catIds=catIds, iscrowd=None)
 		anns = coco.loadAnns(annIds)
 		mask = coco.annToMask(anns[0])
-		mask2 = cv2.resize(mask, (128, 128), cv2.INTER_LINEAR)
+		mask2 = cv2.resize(mask, (224, 224), cv2.INTER_LINEAR)
 
 		train.append(I3)
 		y.append(mask2)
@@ -68,8 +68,8 @@ def generateData():
 
 	for i in range(len(img) - 1500, len(img)):
 		I = io.imread('%s/images/%s/%s'%(dataDir,dataType,img[i]['file_name']))
-		I3 = cv2.resize(I, (128, 128), cv2.INTER_LINEAR)
-		if (I3.shape != (128,128,3)):
+		I3 = cv2.resize(I, (224, 224), cv2.INTER_LINEAR)
+		if (I3.shape != (224,224, 3)):
 			continue
 		#I3 = [I2[:,:,0], I2[:,:,1], I2[:,:,2]]
 		#I3 = np.asarray(I3)
@@ -77,7 +77,7 @@ def generateData():
 		annIds = coco.getAnnIds(imgIds=img[i]['id'], catIds=catIds, iscrowd=None)
 		anns = coco.loadAnns(annIds)
 		mask = coco.annToMask(anns[0])
-		mask2 = cv2.resize(mask, (128, 128), cv2.INTER_LINEAR)
+		mask2 = cv2.resize(mask, (224, 224), cv2.INTER_LINEAR)
 
 		x_test.append(I3)
 		y_test.append(mask2)
@@ -90,7 +90,7 @@ def generateData():
 
 
 def get_model(channelsize):
-	inputs = Input(shape = (128,128, 3))
+	inputs = Input(shape = (224,224, 3))
 	conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
 	conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv1)
 	pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     
 
     #Train
-    model.fit(train, y, batch_size=32, epochs=150, verbose=1, shuffle=True, callbacks=[model_checkpoint, earlystop],validation_data=(x_test, y_test))
+    model.fit(train, y, batch_size=32, epochs=150, verbose=1, shuffle=True, callbacks=[model_checkpoint],validation_data=(x_test, y_test))
 
     #Test
     #a=model.predict(X_test, batch_size=32, verbose=2)
