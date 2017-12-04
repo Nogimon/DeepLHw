@@ -2,6 +2,8 @@ from keras.models import Sequential
 from keras.layers.convolutional import Conv3D
 from keras.layers.convolutional_recurrent import ConvLSTM2D
 from keras.layers.normalization import BatchNormalization
+from keras.models import Model
+from keras.layers import Input
 import numpy as np
 import pylab as plt
 
@@ -61,8 +63,26 @@ def generate_movies(n_samples=1200, n_frames=15):
     shifted_movies[shifted_movies >= 1] = 1
     return noisy_movies, shifted_movies
 
+def get_lstm():
+    inputs = Input((None, 40, 40, 1))
+    lstm1 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(inputs)
+    norm1 = BatchNormalization()(lstm1)
+    lstm2 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(norm1)
+    norm2 = BatchNormalization()(lstm2)
+    lstm3 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(norm2)
+    norm3 = BatchNormalization()(lstm3)
+    lstm4 = ConvLSTM2D(filters=40, kernel_size=(3, 3), padding='same', return_sequences=True)(norm3)
+    norm4 = BatchNormalization()(lstm4)
+    conv1 = Conv3D(filters=1, kernel_size=(3, 3, 3),
+                   activation='sigmoid',
+                   padding='same', data_format='channels_last')(norm4)
+    model = Model(inputs = [inputs], outputs = [conv1])
+    return model
+
+
 if __name__ == "__main__":
 
+    '''
     seq = Sequential()
     seq.add(ConvLSTM2D(filters=40, kernel_size=(3, 3),
                        input_shape=(None, 40, 40, 1),
@@ -85,6 +105,9 @@ if __name__ == "__main__":
                    activation='sigmoid',
                    padding='same', data_format='channels_last'))
     seq.compile(loss='binary_crossentropy', optimizer='adadelta')
+    '''
+    model = get_lstm()
+    model.compile(optimizer = 'adadelta', loss = 'binary_crossentropy')
 
     noisy_movies, shifted_movies = generate_movies(n_samples=1200)
-    seq.fit(noisy_movies[:1000], shifted_movies[:1000], batch_size=10, epochs=10, validation_split=0.05)
+    model.fit(noisy_movies[:1000], shifted_movies[:1000], batch_size=10, epochs=10, validation_split=0.05)
