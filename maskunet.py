@@ -84,7 +84,7 @@ def dice_coef(y_true, y_pred):
 def dice_coef_loss(y_true, y_pred):
 	return -dice_coef(y_true, y_pred)
 
-def plotresult(a, groundtruth):
+def plotresult(a, groundtruth, original):
 
 	for i in range(len(a)):
 		c=a[i]*255
@@ -100,7 +100,7 @@ def plotresult(a, groundtruth):
 
 		dst = cv2.addWeighted(cc,0.5,bb,0.5,0)    
 		cv2.imwrite('./result/{}.jpg'.format(format(i,'05')),dst)
-		cv2.imwrite('./result/{}_original.jpg'.format(format(i,'05')), groundtruth[i])
+		cv2.imwrite('./result/{}_original.jpg'.format(format(i,'05')), original[i])
 
 
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 	earlystop = EarlyStopping(monitor='val_loss', patience=3, mode='auto')
 
 	x_test = train[-100:]
-	y_test = train[-100:]
+	y_test = y[-100:]
 
 	#Train
 	model.fit(train, y, batch_size=32, epochs=30, verbose=1, shuffle=True, callbacks=[model_checkpoint, earlystop],validation_data=(x_test, y_test))
@@ -129,5 +129,5 @@ if __name__ == "__main__":
 	#Test
 	predict = model.predict(train, batch_size=32, verbose=2)
 
-	plotresult(predict, y)
+	plotresult(predict, y, train)
 
