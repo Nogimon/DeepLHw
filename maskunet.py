@@ -32,7 +32,7 @@ def loaddata(directory, size):
 	return (train, y)
 
 def get_unet():
-	inputs = Input(shape = (128, 128, 3))
+	inputs = Input(shape = (128, 128, 1))
 	conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
 	conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv1)
 	pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
@@ -69,7 +69,7 @@ def get_unet():
 	conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv9)
 
 	#conv10 = Conv2D(1, (1, 1), activation='sigmoid')(conv9)
-	conv10 = Conv2D(channelsize, (1, 1), activation = 'sigmoid')(conv9)
+	conv10 = Conv2D(1, (1, 1), activation = 'sigmoid')(conv9)
 
 	model = Model(inputs=[inputs], outputs=[conv10])
 	
@@ -89,7 +89,7 @@ def plotresult(a, groundtruth):
 	for i in range(len(a)):
 		c=a[i]*255
 		c=c.astype('uint8')
-		b=groundtruth*255
+		b=groundtruth[i]*255
 		bb=cv2.cvtColor(b,cv2.COLOR_GRAY2RGB)
 		cc=cv2.cvtColor(c,cv2.COLOR_GRAY2RGB)
 		bbb=np.where(bb>0)
@@ -99,8 +99,8 @@ def plotresult(a, groundtruth):
 		bb[bbb[0:2]]=[0, 0, 255]   
 
 		dst = cv2.addWeighted(cc,0.5,bb,0.5,0)    
-		cv2.imwrite('./result/'+name+'{}.jpg'.format(format(i,'05')),dst)
-		cv2.imwrite('./result/'+name+'{}_original.jpg'.format(format(i,'05')),X_test[i])
+		cv2.imwrite('./result/{}.jpg'.format(format(i,'05')),dst)
+		cv2.imwrite('./result/{}_original.jpg'.format(format(i,'05')), groundtruth[i])
 
 
 
@@ -108,6 +108,9 @@ if __name__ == "__main__":
 	size = 128
 	directory = "./data/"
 	train, y = loaddata(directory, size)
+
+	train = train[..., np.newaxis]
+	y = y[..., np.newaxis]
 
 	#Set the model
 	K.set_image_data_format('channels_last') 
@@ -121,7 +124,7 @@ if __name__ == "__main__":
 	y_test = train[-100:]
 
 	#Train
-	model.fit(train, y, batch_size=32, epochs=150, verbose=1, shuffle=True, callbacks=[model_checkpoint],validation_data=(x_test, y_test))
+	model.fit(train, y, batch_size=32, epochs=30, verbose=1, shuffle=True, callbacks=[model_checkpoint, earlystop],validation_data=(x_test, y_test))
 
 	#Test
 	predict = model.predict(train, batch_size=32, verbose=2)
