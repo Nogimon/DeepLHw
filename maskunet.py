@@ -13,6 +13,7 @@ from skimage import transform
 def loaddata(directory, size):
 	train = []
 	y = []
+	shift = 10
 
 	file0 = glob(directory + "*[0-9].png")
 	for i in file0:
@@ -20,11 +21,51 @@ def loaddata(directory, size):
 		resized = cv2.resize(img, (size, size), cv2.INTER_LINEAR)
 		train.append(resized)
 
+		#augmentation
+		augmented = transform.rotate(resized, 90)
+		train.append(augmented)
+		augmented = transform.rotate(resized, 180)
+		train.append(augmented)
+		augmented = transform.rotate(resized, 270)
+		train.append(augmented)
+		augmented = np.roll(resized, shift, axis = 1)
+		augmented[:,0:shift] = 0
+		train.append(augmented)
+		augmented = np.roll(resized, shift, axis = 0)
+		augmented[0:shift,:] = 0
+		train.append(augmented)
+		augmented = np.roll(resized, -shift, axis = 1)
+		augmented[:,-shift:] = 0
+		train.append(augmented)
+		augmented = np.roll(resized, -shift, axis = 0)
+		augmented[-shift:,:] = 0
+		train.append(augmented)
+	
 	file1 = glob(directory + "*mask.png")
 	for i in file1:
 		img = np.asarray(Image.open(i))
 		resized = cv2.resize(img, (size, size), cv2.INTER_LINEAR)
 		y.append(resized)
+
+		#augmentation
+		augmented = transform.rotate(resized, 90)
+		y.append(augmented)
+		augmented = transform.rotate(resized, 180)
+		y.append(augmented)
+		augmented = transform.rotate(resized, 270)
+		y.append(augmented)
+		augmented = np.roll(resized, shift, axis = 1)
+		augmented[:,0:shift] = 0
+		y.append(augmented)
+		augmented = np.roll(resized, shift, axis = 0)
+		augmented[0:shift,:] = 0
+		y.append(augmented)
+		augmented = np.roll(resized, -shift, axis = 1)
+		augmented[:,-shift:] = 0
+		y.append(augmented)
+		augmented = np.roll(resized, -shift, axis = 0)
+		augmented[-shift:,:] = 0
+		y.append(augmented)
 
 	train = np.asarray(train)
 	y = np.asarray(y)
@@ -120,11 +161,11 @@ if __name__ == "__main__":
 	model_checkpoint = ModelCheckpoint('./weights.h5', monitor='val_loss', save_best_only=True)
 	earlystop = EarlyStopping(monitor='val_loss', patience=3, mode='auto')
 
-	x_test = train[-100:]
-	y_test = y[-100:]
+	x_test = train[:100]
+	y_test = y[:100]
 
 	#Train
-	model.fit(train, y, batch_size=32, epochs=30, verbose=1, shuffle=True, callbacks=[model_checkpoint, earlystop],validation_data=(x_test, y_test))
+	model.fit(train[100:], y[100:], batch_size=32, epochs=30, verbose=1, shuffle=True, callbacks=[model_checkpoint, earlystop],validation_data=(x_test, y_test))
 
 	#Test
 	predict = model.predict(train, batch_size=32, verbose=2)
